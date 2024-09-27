@@ -1,6 +1,5 @@
 from os import environ
-
-import requests
+from requests import get, put
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -24,7 +23,7 @@ class DataManager:
         """
 
         # Make a request to get the data of the worksheet
-        response = requests.get(
+        response = get(
             url=self.SHEETY_WORKSHEET_ENDPOINT,
             auth=(
                 self.AUTH_USER,
@@ -53,7 +52,7 @@ class DataManager:
             }
 
             # Make a request to put the new data to the worksheet
-            response = requests.put(
+            response = put(
                 url=f"{self.SHEETY_WORKSHEET_ENDPOINT}/{city["id"]}",
                 json=parameters,
                 auth=(
