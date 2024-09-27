@@ -1,7 +1,7 @@
 from os import environ
-
 import requests
 from dotenv import load_dotenv
+from datetime import datetime, timedelta
 
 load_dotenv()
 
@@ -12,6 +12,7 @@ class FlightSearch:
     def __init__(self):
         self.AMADEUS_TOKEN_ENDPOINT = "https://test.api.amadeus.com/v1/security/oauth2/token"
         self.AMADEUS_ENDPOINT = "https://test.api.amadeus.com/v1/reference-data/locations/cities"
+        self.AMADEUS_PRICE_ENDPOINT = "https://test.api.amadeus.com/v2/shopping/flight-offers"
 
         self.AMADEUS_API_KEY = environ["AMADEUS_API_KEY"]
         self.AMADEUS_API_SECRET = environ["AMADEUS_API_SECRET"]
@@ -37,7 +38,7 @@ class FlightSearch:
 
         return response.json()["access_token"]
 
-    def get_destination_data(self, city_name):
+    def get_destination_data(self, city_name : str):
         """
         Gets the destination data
         :param city_name: String with the name of the city
@@ -64,8 +65,34 @@ class FlightSearch:
         try:
             return response.json()["data"][0]["iataCode"]
         except IndexError:
-            print(f"No airport code found for: {city_name}")
+            print(f"No airport code found for {city_name}")
             return "N/A"
         except KeyError:
             print(f"No airport code found for {city_name}")
             return "Not found"
+
+    def check_flights(self, origin_code: str, currency_code : str, city_code : str):
+
+        tomorrow = datetime.today() + timedelta(days=1)
+        tomorrow = tomorrow.strftime("%Y-%m-%d")
+
+        # Headers with the token data
+        headers = {
+            "Authorization": f"Bearer {self.token}"
+        }
+
+        parameters = {
+            "originLocationCode": origin_code,
+            "destinationLocationCode": city_code,
+            "departureDate": tomorrow,
+            "adults": 1,
+            "currencyCode": currency_code
+        }
+
+        response = requests.get(
+            url=self.AMADEUS_PRICE_ENDPOINT,
+            headers=headers,
+            params=parameters
+        )
+
+        return  response.json()
