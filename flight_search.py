@@ -11,7 +11,7 @@ class FlightSearch:
     """
     def __init__(self):
         self.AMADEUS_TOKEN_ENDPOINT = "https://test.api.amadeus.com/v1/security/oauth2/token"
-        self.AMADEUS_ENDPOINT = "https://test.api.amadeus.com/v1/reference-data/locations/cities"
+        self.AMADEUS_CITY_ENDPOINT = "https://test.api.amadeus.com/v1/reference-data/locations/cities"
         self.AMADEUS_PRICE_ENDPOINT = "https://test.api.amadeus.com/v2/shopping/flight-offers"
 
         self.AMADEUS_API_KEY = environ["AMADEUS_API_KEY"]
@@ -19,7 +19,11 @@ class FlightSearch:
         self.token = self.get_new_token()
 
     def get_new_token(self):
-
+        """
+        Gets a new token to use the Amadeus API
+        More info: https://developers.amadeus.com/self-service/apis-docs/guides/developer-guides/API-Keys/authorization/
+        :return:
+        """
         headers = {
             "Content-Type": "application/x-www-form-urlencoded"
         }
@@ -41,6 +45,7 @@ class FlightSearch:
     def get_destination_data(self, city_name : str):
         """
         Gets the destination data
+        More info: https://developers.amadeus.com/self-service/category/destination-experiences/api-doc/city-search/api-reference
         :param city_name: String with the name of the city
         :return:
         """
@@ -56,7 +61,7 @@ class FlightSearch:
         }
 
         response = requests.get(
-            url=self.AMADEUS_ENDPOINT,
+            url=self.AMADEUS_CITY_ENDPOINT,
             headers=headers,
             params=parameters
         )
@@ -71,8 +76,16 @@ class FlightSearch:
             print(f"No airport code found for {city_name}")
             return "Not found"
 
-    def check_flights(self, origin_code: str, currency_code : str, city_code : str):
-
+    def check_flights(self, origin_city_code: str, destination_city_code : str, currency_code : str, is_direct : bool = True):
+        """
+        Gets the price data of flights using the Amadeus API
+        More info: https://developers.amadeus.com/self-service/category/flights/api-doc/flight-offers-search/api-reference
+        :param origin_city_code: String with the code of the user's city
+        :param destination_city_code: String with the code of the destination city
+        :param currency_code: String with the currency  code
+        :param is_direct: Boolean with code where it will only look flights that go from the origin
+        :return:
+        """
         tomorrow = datetime.today() + timedelta(days=1)
         tomorrow = tomorrow.strftime("%Y-%m-%d")
 
@@ -82,10 +95,11 @@ class FlightSearch:
         }
 
         parameters = {
-            "originLocationCode": origin_code,
-            "destinationLocationCode": city_code,
+            "originLocationCode": origin_city_code,
+            "destinationLocationCode": destination_city_code,
             "departureDate": tomorrow,
             "adults": 1,
+            "nonStop": is_direct,
             "currencyCode": currency_code
         }
 

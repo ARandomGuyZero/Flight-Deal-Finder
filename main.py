@@ -37,7 +37,12 @@ data_manager.put_destination_data()
 for destination in sheet_data:
 
     # Get data using flight
-    flights = flight_search.check_flights(ORIGIN_COUNTRY_CODE, CURRENCY_CODE, destination["iataCode"])
+    flights = flight_search.check_flights(
+        origin_city_code=ORIGIN_COUNTRY_CODE,
+        currency_code=CURRENCY_CODE,
+        destination_city_code=destination["iataCode"],
+        is_direct=False
+    )
 
     # Get the cheapest flight data
     cheapest_flight = find_cheapest_flight(flights)
