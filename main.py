@@ -9,12 +9,14 @@ This script gets the price data of flights.
 from flight_data import find_cheapest_flight
 from flight_search import FlightSearch
 from data_manager import DataManager
+from notification_manager import NotificationManager
 
 ORIGIN_COUNTRY_CODE = "MEX"
 CURRENCY_CODE = "MXM"
 
 data_manager = DataManager() # New object class with the data from the worksheet
 flight_search = FlightSearch() # New object class with the data from the flight
+notification_manager = NotificationManager()
 
 # Set it to a new variable
 sheet_data = data_manager.get_destination_data()
@@ -34,8 +36,16 @@ data_manager.put_destination_data()
 
 for destination in sheet_data:
 
-    # Get data using flightt
+    # Get data using flight
     flights = flight_search.check_flights(ORIGIN_COUNTRY_CODE, CURRENCY_CODE, destination["iataCode"])
 
     # Get the cheapest flight data
     cheapest_flight = find_cheapest_flight(flights)
+
+    if cheapest_flight.price != "N/A" and cheapest_flight.price < destination["lowestPrice"]:
+        print(f"Lower price flight found to {destination['city']}!")
+        notification_manager.send_message(
+            message_body=f"Low price alert! Only £{cheapest_flight.price} to fly "
+            f"from {cheapest_flight.origin_airport} to {cheapest_flight.destination_airport}, "
+            f"on {cheapest_flight.out_date} until {cheapest_flight.return_date}."
+        )

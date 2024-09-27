@@ -31,7 +31,7 @@ def find_cheapest_flight(data):
     # Initialize FlightData with the first flight for comparison
     cheapest_flight = FlightData(lowest_price, origin, destination, out_date, return_date)
 
-    # For each flight in the data
+    # For each flight in the data, we get the necessary data from the json file
     for flight in data["data"]:
         price = float(flight["price"]["grandTotal"])
         if price < lowest_price:
